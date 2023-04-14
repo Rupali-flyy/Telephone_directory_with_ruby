@@ -1,18 +1,20 @@
 class Api::V1::ContactsController < ApplicationController
   def index
     contact = Contact.all 
+    console.log(contact)
     render json: contact, status:200
   end
 
   def show
-   contact = Contact.find_by(id: params[:id])
+    contact = Contact.find_by(id: params[:id])
     if contact
-      render json: contact, status:200
+      addresses = contact.addresses 
+      # render json: { contact: contact, addresses: addresses }, status: 200 
+      contact_data = contact.as_json.except("address").merge("addresses" => addresses.as_json)
+      render json: { contact: contact_data }, status: 200 
     else
-    render json:{
-     error: "contact by this id is not present..."
-    }
-  end
+      render json: { error: "contact by this id is not present..." }
+    end
   end
 
   def create
@@ -34,10 +36,10 @@ class Api::V1::ContactsController < ApplicationController
       contact.update(update_contacts)
       render json: contact, status:200 , message: "Contact updated successfully"
     else
-    render json:{
-     error: "contact not present..."
-    }
-  end
+      render json:{
+      error: "contact not present..."
+      }
+    end
   end
 
   def destroy
@@ -53,12 +55,6 @@ class Api::V1::ContactsController < ApplicationController
   end
   end
 
-  # def contacts_by_status
-  #   is_active = params[:is_active]
-  #   if is_active
-  #   contacts = contacts.find{} 
-
-  # end
 
   def index
     contact=Contact.where(is_active: params[:is_active])
