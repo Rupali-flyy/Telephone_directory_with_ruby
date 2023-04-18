@@ -19,12 +19,18 @@ class Api::V1::AddressesController < ApplicationController
 
   def index
     adresses = Address.where(contact_id: params[:contact_id])
-    if adresses
-      render json: adresses, status:200
-    else
-      render json:{
-        error: "contacts are not present by this status"
-      }
+    puts adresses.inspect
+  #   if adresses
+  #     render json: adresses, status:200
+  #   else
+  #     render json:{
+  #       error: "contacts are not present by this status"
+  #     }
+  # end
+  if adresses.empty?
+    render json: { error: "No addresses found for contact_id #{params[:contact_id]}" }, status: :not_found
+  else
+    render json: adresses, status: :ok
   end
   end
 

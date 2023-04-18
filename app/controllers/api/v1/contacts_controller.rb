@@ -10,7 +10,8 @@ class Api::V1::ContactsController < ApplicationController
     if contact
       addresses = contact.addresses 
       # render json: { contact: contact, addresses: addresses }, status: 200 
-      contact_data = contact.as_json.except("address").merge("addresses" => addresses.as_json)
+      # contact_data = contact.as_json.except("address").merge("addresses" => addresses.as_json)
+      contact_data = contact.as_json(except: [:address, :created_at, :updated_at]).merge("addresses" => addresses.as_json(except: [:created_at, :updated_at]))
       render json: { contact: contact_data }, status: 200 
     else
       render json: { error: "contact by this id is not present..." }
@@ -21,6 +22,7 @@ class Api::V1::ContactsController < ApplicationController
     contact=Contact.new(
       create_contacts
     )  
+    contact.contact_id = generate_contact_id
     if contact.save
       render json: contact, status:200
     else
@@ -82,6 +84,11 @@ end
   end
   def update_contacts
     params.require(:contact).permit([:name, :age, :is_active, :phone_number, :address])
+  end
+  def generate_contact_id
+    timestamp = Time.now.to_i.to_s
+    random_number = rand(1000..9999).to_s
+    timestamp + random_number
   end
 
 end
