@@ -1,22 +1,31 @@
 class Api::V1::ContactsController < ApplicationController
   def index
     contact = Contact.all 
-    console.log(contact)
+    puts contact.inspect
     render json: contact, status:200
   end
 
+  # def show
+  #   contact = Contact.find_by(id: params[:id])
+  #   if contact
+  #     addresses = contact.addresses 
+  #     contact_data = contact.as_json(except: [:address, :created_at, :updated_at]).merge("addresses" => addresses.as_json(except: [:created_at, :updated_at]))
+  #     render json: { contact: contact_data }, status: 200 
+  #   else
+  #     render json: { error: "contact by this id is not present..." }
+  #   end
+  # end
+
   def show
-    contact = Contact.find_by(id: params[:id])
+    contact = Contact.joins(:addresses).find_by(id: params[:id])
     if contact
-      addresses = contact.addresses 
-      # render json: { contact: contact, addresses: addresses }, status: 200 
-      # contact_data = contact.as_json.except("address").merge("addresses" => addresses.as_json)
-      contact_data = contact.as_json(except: [:address, :created_at, :updated_at]).merge("addresses" => addresses.as_json(except: [:created_at, :updated_at]))
-      render json: { contact: contact_data }, status: 200 
+      render json: contact.as_json(except: [:address, :created_at, :updated_at], include: { addresses: { except: [:created_at, :updated_at] } }), status: 200
     else
       render json: { error: "contact by this id is not present..." }
     end
   end
+  
+
 
   def create
     contact=Contact.new(
@@ -58,10 +67,10 @@ class Api::V1::ContactsController < ApplicationController
   end
 
 
-  def index
-    contact=Contact.where(is_active: params[:is_active])
-    if contact
-      render json: contact, status:200
+  def search
+    contacts=Contact.where(is_active: params[:is_active])
+    if contacts
+      render json: contacts, status:200
     else
       render json:{
         error: "contacts are not present by this status"
