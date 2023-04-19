@@ -1,6 +1,9 @@
 class Api::V1::OrdersController < ApplicationController
   def create
     product = Product.find_by(product_id: params[:product_id])
+      # Access quantity and total_amount from the product instance
+      quantity = product.quantity
+      total_amount = product.total_amount
     # p product
     contact = Contact.find_by(id: params[:contact_id])
     # p contact
@@ -15,11 +18,13 @@ class Api::V1::OrdersController < ApplicationController
       p order
       order.order_id = generate_order_id
    
+   
       render json: { 
                order: order.as_json(except: [:id, :created_at, :updated_at]),
                product: product.as_json(except: [:created_at, :updated_at]), 
                contact: contact.as_json(except: [:created_at, :updated_at]), 
-               address: address.as_json(except: [:created_at, :updated_at]) }, 
+               address: address.as_json(except: [:created_at, :updated_at]),
+               }, 
        status: 200
 
     else
